@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- notice.xml -->
+<!-- namespace="패키지명.인터페이스" -->
+<mapper namespace="dev.blog.notice5.NoticeMapper">
+
+	<insert id="create" parameterType="NoticeDTO">
+		<selectKey keyProperty="noticeno" resultType="int"
+			order="BEFORE">
+		<![CDATA[
+			SELECT NVL(MAX(noticeno),0) + 1 AS noticeno
+			FROM notice5
+		]]>
+		</selectKey>
+		
+		<![CDATA[
+			INSERT INTO notice5(noticeno, title, rname, rdate)
+			VALUES (#{noticeno}, #{title}, #{rname}, sysdate)
+		]]>
+	</insert>
+
+	<select id="list" resultType="NoticeDTO">
+		<![CDATA[
+			SELECT noticeno, title, rname, rdate
+			FROM notice5
+			ORDER BY noticeno DESC
+		]]>
+	</select>
+
+	<select id="read" parameterType="NoticeDTO"
+		resultType="NoticeDTO">
+		<![CDATA[
+			SELECT noticeno, title, rname, rdate
+			FROM notice5
+			WHERE noticeno = #{noticeno}
+		]]>
+	</select>
+
+	<delete id="delete" parameterType="NoticeDTO">
+		<![CDATA[
+			DELETE FROM notice5
+			WHERE noticeno = #{noticeno}
+		]]>
+	</delete>
+
+	<update id="update" parameterType="NoticeDTO">
+		<![CDATA[
+			UPDATE notice5
+			SET title=#{title}, rname=#{rname}, rdate=sysdate
+			WHERE noticeno=#{noticeno}
+		]]>
+	</update>
+
+	<select id="search" resultType="NoticeDTO" parameterType="HashMap">
+		SELECT noticeno, title, rname, rdate
+		FROM notice5
+		<choose>
+			<when test="col == 'title'">
+				WHERE title LIKE '%' || #{word} || '%'
+			</when>	
+			<when test="col == 'rname'">
+				WHERE rname LIKE '%' || #{word} || '%'
+			</when>	
+			<when test="col == 'title_rname'">
+				WHERE title LIKE '%' || #{word} || '%' or rname LIKE '%' || #{word} || '%'
+			</when>	
+		</choose>
+		ORDER BY noticeno DESC
+	</select>
+
+</mapper>
